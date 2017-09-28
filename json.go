@@ -162,7 +162,7 @@ func NewMapJsonReaderAll(jsonReader io.Reader) (Map, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewMapJson(m)
+	return m, nil
 }
 
 // Retrieve a Map value from an io.Reader.
