@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"time"
 )
 
@@ -105,7 +106,7 @@ func (mv Map) JsonIndentWriterRaw(jsonWriter io.Writer, prefix, indent string, s
 // --------------------------- read JSON -----------------------------
 
 // Decode numericvalues as json.Number type Map values - see encoding/json#Number.
-// NOTE: this is for decoding JSON into a Map with NewMapJson(), NewMapJsonReader(), 
+// NOTE: this is for decoding JSON into a Map with NewMapJson(), NewMapJsonReader(),
 // etc.; it does not affect NewMapXml(), etc.  The XML encoders mv.Xml() and mv.XmlIndent()
 // do recognize json.Number types; a JSON object can be decoded to a Map with json.Number
 // value types and the resulting Map can be correctly encoded into a XML object.
@@ -151,6 +152,23 @@ func NewMapJson(jsonVal []byte) (Map, error) {
 //        os.File, there may be significant performance impact. If the io.Reader is wrapping a []byte
 //        value in-memory, however, such as http.Request.Body you CAN use it to efficiently unmarshal
 //        a JSON object.
+func NewMapJsonReaderAll(jsonReader io.Reader) (Map, error) {
+	dec := json.NewDecoder(jsonReader)
+	if JsonUseNumber {
+		dec.UseNumber()
+	}
+	err := dec.Decode(&m) // Unmarshal the 'presumed' JSON string
+	if err != nil {
+		return nil, err
+	}
+	return NewMapJson(m)
+}
+
+// Retrieve a Map value from an io.Reader.
+//  NOTE: The raw JSON off the reader is buffered to []byte using a ByteReader. If the io.Reader is an
+//        os.File, there may be significant performance impact. If the io.Reader is wrapping a []byte
+//        value in-memory, however, such as http.Request.Body you CAN use it to efficiently unmarshal
+//        a JSON object.
 func NewMapJsonReader(jsonReader io.Reader) (Map, error) {
 	jb, err := getJson(jsonReader)
 	if err != nil || len(*jb) == 0 {
@@ -189,7 +207,7 @@ func getJson(rdr io.Reader) (*[]byte, error) {
 	// scan the input for a matched set of {...}
 	// json.Unmarshal will handle syntax checking.
 	for {
-		_, err := rdr.Read(bval)
+		_, err := rdr.ReadAll(bval)
 		if err != nil {
 			if err == io.EOF && inJson && parenCnt > 0 {
 				return &jb, fmt.Errorf("no closing } for JSON string: %s", string(jb))
