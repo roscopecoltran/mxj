@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
+	// "io/ioutil"
 	"time"
 )
 
@@ -157,6 +157,7 @@ func NewMapJsonReaderAll(jsonReader io.Reader) (Map, error) {
 	if JsonUseNumber {
 		dec.UseNumber()
 	}
+	m := make(map[string]interface{})
 	err := dec.Decode(&m) // Unmarshal the 'presumed' JSON string
 	if err != nil {
 		return nil, err
@@ -207,7 +208,7 @@ func getJson(rdr io.Reader) (*[]byte, error) {
 	// scan the input for a matched set of {...}
 	// json.Unmarshal will handle syntax checking.
 	for {
-		_, err := rdr.ReadAll(bval)
+		_, err := rdr.Read(bval)
 		if err != nil {
 			if err == io.EOF && inJson && parenCnt > 0 {
 				return &jb, fmt.Errorf("no closing } for JSON string: %s", string(jb))
