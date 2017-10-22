@@ -86,6 +86,16 @@ func NewMapXmlReader(xmlReader io.Reader, cast ...bool) (Map, error) {
 	return xmlReaderToMap(xmlReader, r)
 }
 
+func NewMapXmlReaderAll(xmlReader io.Reader, cast ...bool) (Map, error) {
+	var r bool
+	if len(cast) == 1 {
+		r = cast[0]
+	}
+	dec := xml.NewDecoder(xmlReader)
+	// build the map
+	return xmlReaderToMap(xmlReader, dec)
+}
+
 // Get next XML doc from an io.Reader as a Map value.  Returns Map value and slice with the raw XML.
 //	NOTES:
 //	   1. Due to the implementation of xml.Decoder, the raw XML off the reader is buffered to []byte
@@ -956,7 +966,7 @@ func mapToXmlIndent(doIndent bool, s *string, key string, value interface{}, pp 
 		// would be encountered if mv generated from NewMapXml, NewMapJson.
 		// Could be encountered in AnyXml(), so we'll let it stay, though
 		// it should be merged with case []interface{}, above.
-		//quick fix for []string type 
+		//quick fix for []string type
 		//[]string should be treated exaclty as []interface{}
 		if len(value.([]string)) == 0 {
 			if doIndent {

@@ -165,6 +165,19 @@ func NewMapJsonReaderAll(jsonReader io.Reader) (Map, error) {
 	return m, nil
 }
 
+func NewMapJsonArrayReaderAll(jsonReader io.Reader, parent string) (Map, error) {
+	var collection []interface{}
+	dec := json.NewDecoder(jsonReader)
+	if JsonUseNumber {
+		dec.UseNumber()
+	}
+	if err := dec.Decode(&collection); err != nil {
+		return nil, err
+	}
+	m := map[string]interface{}{parent: collection}
+	return m, nil
+}
+
 // Retrieve a Map value from an io.Reader.
 //  NOTE: The raw JSON off the reader is buffered to []byte using a ByteReader. If the io.Reader is an
 //        os.File, there may be significant performance impact. If the io.Reader is wrapping a []byte
