@@ -165,17 +165,17 @@ func NewMapJsonReaderAll(jsonReader io.Reader) (Map, error) {
 	return m, nil
 }
 
-func NewMapJsonArrayReaderAll(jsonReader io.Reader, parent string) (Map, error) {
-	var collection []interface{}
+func NewMapJsonArrayReaderAll(jsonReader io.Reader) (Map, error) {
+	var items []interface{}
 	dec := json.NewDecoder(jsonReader)
 	if JsonUseNumber {
 		dec.UseNumber()
 	}
-	if err := dec.Decode(&collection); err != nil {
+	if err := dec.Decode(&items); err != nil {
 		return nil, err
 	}
-	m := map[string]interface{}{parent: collection}
-	return m, nil
+	// m := map[string]interface{}{"items": items}
+	return map[string]interface{}{"items": items}, nil
 }
 
 // Retrieve a Map value from an io.Reader.
